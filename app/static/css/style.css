@@ -1,0 +1,10 @@
+body {
+    min-height: 100vh;
+}
+table {
+    border-collapse: collapse;
+}
+button,
+a {
+    transition: 0.2s;
+}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow p-6 max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Регистрация</h1>
+
+    <form method="post" class="space-y-4">
+        <div>
+            <label class="block mb-1">ФИО</label>
+            <input type="text" name="full_name" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+            <label class="block mb-1">Email</label>
+            <input type="email" name="email" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+            <label class="block mb-1">Пароль</label>
+            <input type="password" name="password" class="w-full border rounded px-3 py-2" required>
+        </div>
+        <div>
+            <label class="block mb-1">Роль</label>
+            <select name="role" class="w-full border rounded px-3 py-2">
+                {% for role in roles %}
+                    <option value="{{ role }}">{{ role }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded">
+            Зарегистрироваться
+        </button>
+    </form>
+</div>
+{% endblock %}
