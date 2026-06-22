@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 
+#класс настоке .env
 class Confing:
     SECRET_KEY = os.getenv("SECRET_KEY", "default-secret-key")
     SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
