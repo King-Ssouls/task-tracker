@@ -2,7 +2,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from .extensions import db, login_manager
 
-# Модель пользователя 
+#модель пользователя 
 class User(db.Model, UserMixin):
     
     __tablename__ = "users"
@@ -21,6 +21,20 @@ class User(db.Model, UserMixin):
     tasks = db.relationship("Task", backref="assignee", lazy=True)
     comments = db.relationship("Comment", backref="author", lazy=True)
     attachments = db.relationship("Attachment", backref="uploader", lazy=True)
+
+    #связь пользователей с проектами, где они участвуют
+    project_memberships = db.relationship(
+        "ProjectMember",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    # а это связь пользователей с проектами гдле заявки
+    project_requests = db.relationship(
+        "ProjectJoinRequest",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
     
     
     def __repr__(self):
@@ -31,7 +45,8 @@ class User(db.Model, UserMixin):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Модель проекта
+
+#модель проекта
 class Project(db.Model):
 
     __tablename__ = "projects"
@@ -45,6 +60,7 @@ class Project(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    #связь спринтов с проектом
     sprints = db.relationship(
         "Sprint",
         backref="project",
@@ -52,10 +68,97 @@ class Project(db.Model):
         cascade="all, delete-orphan"
     )
 
+    #связь проекта с участниками проекта
+    memberships = db.relationship(
+        "ProjectMember",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+    #связь проекта с заявками на вступлениие
+    join_requests = db.relationship(
+        "ProjectJoinRequest",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+    #фунция для назначения владельца проектом автоматом тимлидом
+    def is_teamlead(self, user_id):
+        return self.owner_id == user_id
+
+    #проверка, есть ли пользователь в проекте
+    def has_member(self, user_id):
+        return self.owner_id == user_id or any(
+            membership.user_id == user_id for membership in self.memberships
+        )
+
     def __repr__(self):
         return f"<Project {self.name}>"
 
-# Модель спринтов
+
+#ммодель участников проекта
+class ProjectMember(db.Model):
+
+    __tablename__ = "project_members"
+    
+    __table_args__ = (
+        db.UniqueConstraint("project_id", "user_id", name="uq_project_member"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    project_id = db.Column(
+        db.Integer,
+        db.ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    project = db.relationship("Project", back_populates="memberships")
+    
+    user = db.relationship("User", back_populates="project_memberships")
+
+#модель заявки на вступление в проект
+class ProjectJoinRequest(db.Model):
+
+    __tablename__ = "project_join_requests"
+    
+    __table_args__ = (
+        db.UniqueConstraint("project_id", "user_id", name="uq_project_join_request"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    project_id = db.Column(
+        db.Integer,
+        db.ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    status = db.Column(db.String(20), nullable=False, default="pending")
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    project = db.relationship("Project", back_populates="join_requests")
+    user = db.relationship("User", back_populates="project_requests")
+
+
+#модель спринтов
 class Sprint(db.Model):
 
     __tablename__ = "sprints"
@@ -83,7 +186,8 @@ class Sprint(db.Model):
     def __repr__(self):
         return f"<Sprint {self.name}>"
 
-# Модель задач
+
+#модель задач
 class Task(db.Model):
 
     __tablename__ = "tasks"
@@ -123,7 +227,8 @@ class Task(db.Model):
     def __repr__(self):
         return f"<Task {self.title}>"
 
-# Модель коментов
+
+#модель коментов
 class Comment(db.Model):
 
     __tablename__ = "comments"
@@ -140,7 +245,8 @@ class Comment(db.Model):
     def __repr__(self):
         return f"<Comment {self.id}>"
 
-# Модель файлов загрузки
+
+#модель файлов загрузки
 class Attachment(db.Model):
 
     __tablename__ = "attachments"
