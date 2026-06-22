@@ -31,7 +31,7 @@ class User(db.Model, UserMixin):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
+# Модель проекта
 class Project(db.Model):
 
     __tablename__ = "projects"
@@ -55,7 +55,7 @@ class Project(db.Model):
     def __repr__(self):
         return f"<Project {self.name}>"
 
-
+# Модель спринтов
 class Sprint(db.Model):
 
     __tablename__ = "sprints"
@@ -83,7 +83,7 @@ class Sprint(db.Model):
     def __repr__(self):
         return f"<Sprint {self.name}>"
 
-
+# Модель задач
 class Task(db.Model):
 
     __tablename__ = "tasks"
@@ -123,7 +123,7 @@ class Task(db.Model):
     def __repr__(self):
         return f"<Task {self.title}>"
 
-
+# Модель коментов
 class Comment(db.Model):
 
     __tablename__ = "comments"
@@ -140,7 +140,7 @@ class Comment(db.Model):
     def __repr__(self):
         return f"<Comment {self.id}>"
 
-
+# Модель файлов загрузки
 class Attachment(db.Model):
 
     __tablename__ = "attachments"
