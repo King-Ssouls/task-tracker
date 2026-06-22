@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
 ALLOWED_STATUSES = ["new", "in_progress", "review", "done"]
-ALLOWED_ROLES = ["admin", "teamlead", "developer", "manager"]
+ALLOWED_ROLES = ["admin", "teamlead", "developer"]
 
 #преобразование строку формата yyyy-mm-dd в дату
 def parse_date(date_string):
