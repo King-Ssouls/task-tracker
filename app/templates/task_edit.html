@@ -1,124 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}Задача{% endblock %}
+{% block title %}Редактирование задачи{% endblock %}
 
 {% block content %}
-<div class="bg-white rounded-xl shadow p-6 mb-6">
-    <div class="flex justify-between items-start">
-        <div>
-            <h1 class="text-2xl font-bold">{{ task.title }}</h1>
-            <p class="text-slate-600 mt-2">{{ task.description }}</p>
-        </div>
+<div class="bg-white rounded-xl shadow p-6 max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Редактирование задачи</h1>
 
-        {% if can_edit %}
-            <a href="{{ url_for('main.task_edit', task_id=task.id) }}" class="bg-green-600 text-white px-4 py-2 rounded">
-                Редактировать
-            </a>
-        {% endif %}
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-        <div class="bg-slate-100 rounded p-4">
-            <p class="text-slate-500">Статус</p>
-            <p class="font-bold">{{ task.status }}</p>
-        </div>
-
-        <div class="bg-slate-100 rounded p-4">
-            <p class="text-slate-500">Story points</p>
-            <p class="font-bold">{{ task.story_points }}</p>
-        </div>
-
-        <div class="bg-slate-100 rounded p-4">
-            <p class="text-slate-500">Исполнитель</p>
-            <p class="font-bold">
-                {% if task.assignee %}
-                    {{ task.assignee.full_name }}
-                {% else %}
-                    Не назначен
-                {% endif %}
+    <form method="post" class="space-y-4">
+        {% if not can_edit_details %}
+            <p class="text-sm text-slate-500">
+                Вы можете изменить только статус задачи. Остальные поля доступны тимлиду или назначенному исполнителю.
             </p>
-        </div>
+        {% endif %}
 
-        <div class="bg-slate-100 rounded p-4">
-            <p class="text-slate-500">Дедлайн</p>
-            <p class="font-bold">{{ task.deadline }}</p>
-        </div>
-    </div>
-</div>
+        {% if can_manage %}
+            <div>
+                <label class="block mb-1">Спринт</label>
+                <select name="sprint_id" class="w-full border rounded px-3 py-2" required>
+                    {% for sprint in sprints %}
+                        <option value="{{ sprint.id }}" {% if task.sprint_id == sprint.id %}selected{% endif %}>
+                            {{ sprint.name }} — {{ sprint.project.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold mb-4">Комментарии</h2>
-
-        <form method="post" action="{{ url_for('main.comment_create', task_id=task.id) }}" class="mb-6">
-            <textarea
-                name="text"
-                class="w-full border rounded px-3 py-2"
-                placeholder="Напишите комментарий"
-                required
-            ></textarea>
-
-            <button class="bg-blue-600 text-white px-4 py-2 rounded mt-3">
-                Добавить комментарий
-            </button>
-        </form>
-
-        <div class="space-y-4">
-            {% for comment in task.comments|sort(attribute="created_at", reverse=true) %}
-                <div class="border rounded p-4">
-                    <div class="flex justify-between text-sm text-slate-500 mb-2">
-                        <span>{{ comment.author.full_name }}</span>
-                        <span>{{ comment.created_at.strftime("%d.%m.%Y %H:%M") }}</span>
-                    </div>
-
-                    <p>{{ comment.text }}</p>
-                </div>
-            {% else %}
-                <p class="text-slate-500">Комментариев пока нет</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold mb-4">Файлы</h2>
-
-        {% if can_upload %}
-            <form
-                method="post"
-                action="{{ url_for('main.upload_file', task_id=task.id) }}"
-                enctype="multipart/form-data"
-                class="mb-6"
-            >
-                <input type="file" name="file" class="w-full border rounded px-3 py-2" required>
-
-                <button class="bg-blue-600 text-white px-4 py-2 rounded mt-3">
-                    Загрузить файл
-                </button>
-            </form>
+            <div>
+                <label class="block mb-1">Исполнитель</label>
+                <select name="assignee_id" class="w-full border rounded px-3 py-2">
+                    <option value="">Не назначен</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if task.assignee_id == user.id %}selected{% endif %}>
+                            {{ user.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
         {% else %}
-            <p class="text-sm text-slate-500 mb-4">
-                Загружать файлы могут тимлид и участники команды проекта.
+            <p class="text-sm text-slate-500">
+                Спринт и исполнителя может менять только тимлид проекта.
             </p>
         {% endif %}
 
-        <div class="space-y-3">
-            {% for file in task.attachments|sort(attribute="uploaded_at", reverse=true) %}
-                <div class="border rounded p-3 flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">{{ file.original_filename }}</p>
-                        <p class="text-sm text-slate-500">
-                            Загрузил: {{ file.uploader.full_name }}
-                        </p>
-                    </div>
-
-                    <a href="{{ url_for('main.download_file', attachment_id=file.id) }}" class="text-blue-600">
-                        Скачать
-                    </a>
-                </div>
-            {% else %}
-                <p class="text-slate-500">Файлов пока нет</p>
-            {% endfor %}
+        <div>
+            <label class="block mb-1">Название</label>
+            <input type="text" name="title" value="{{ task.title }}" class="w-full border rounded px-3 py-2" {% if not can_edit_details %}disabled{% endif %} required>
         </div>
-    </div>
+
+        <div>
+            <label class="block mb-1">Описание</label>
+            <textarea name="description" class="w-full border rounded px-3 py-2" {% if not can_edit_details %}disabled{% endif %}>{{ task.description or "" }}</textarea>
+        </div>
+
+        <div>
+            <label class="block mb-1">Статус</label>
+            <select name="status" class="w-full border rounded px-3 py-2">
+                {% for status in statuses %}
+                    <option value="{{ status }}" {% if task.status == status %}selected{% endif %}>
+                        {{ status }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block mb-1">Story points</label>
+            <input type="number" name="story_points" value="{{ task.story_points }}" min="1" max="100" class="w-full border rounded px-3 py-2" {% if not can_edit_details %}disabled{% endif %}>
+        </div>
+
+        <div>
+            <label class="block mb-1">Дедлайн</label>
+            <input type="date" name="deadline" value="{{ task.deadline if task.deadline else '' }}" class="w-full border rounded px-3 py-2" {% if not can_edit_details %}disabled{% endif %}>
+        </div>
+
+        <div class="flex gap-3">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded">
+                Сохранить
+            </button>
+
+            <a href="{{ url_for('main.task_detail', task_id=task.id) }}" class="border border-slate-300 px-4 py-2 rounded">
+                Отмена
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}

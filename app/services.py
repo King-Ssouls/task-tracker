@@ -30,8 +30,6 @@ def calculate_sprint_stats(sprint):
 
     deviation = round(actual_progress - planned_progress, 2)
 
-    velocity = completed_points
-
     if len(tasks) == 0:
         on_time_percent = 0
     else:
@@ -49,7 +47,6 @@ def calculate_sprint_stats(sprint):
         "actual_progress": actual_progress,
         "planned_progress": planned_progress,
         "deviation": deviation,
-        "velocity": velocity,
         "total_tasks": len(tasks),
         "completed_tasks": len(completed_tasks),
         "on_time_percent": on_time_percent,
