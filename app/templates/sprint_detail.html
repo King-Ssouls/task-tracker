@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Спринт{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <h1 class="text-2xl font-bold">{{ sprint.name }}</h1>
+    <p class="text-slate-600">Проект: {{ sprint.project.name }}</p>
+    <p class="text-slate-600">Период: {{ sprint.start_date }} — {{ sprint.end_date }}</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow p-5">
+        <p class="text-slate-500">Прогресс</p>
+        <p class="text-3xl font-bold">{{ stats.actual_progress }}%</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-5">
+        <p class="text-slate-500">План</p>
+        <p class="text-3xl font-bold">{{ stats.planned_progress }}%</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-5">
+        <p class="text-slate-500">Отклонение</p>
+        <p class="text-3xl font-bold">{{ stats.deviation }}%</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-5">
+        <p class="text-slate-500">Velocity</p>
+        <p class="text-3xl font-bold">{{ stats.velocity }}</p>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <p>Всего story points: <b>{{ stats.total_points }}</b></p>
+    <p>Выполнено story points: <b>{{ stats.completed_points }}</b></p>
+    <p>Всего задач: <b>{{ stats.total_tasks }}</b></p>
+    <p>Выполнено задач: <b>{{ stats.completed_tasks }}</b></p>
+    <p>Задач выполнено в срок: <b>{{ stats.on_time_percent }}%</b></p>
+</div>
+
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">Задачи спринта</h2>
+    <div class="flex gap-3">
+        {% if sprint.project.owner_id == current_user.id %}
+            <a href="{{ url_for('main.task_create', sprint_id=sprint.id) }}" class="bg-blue-600 text-white px-4 py-2 rounded">
+                Создать задачу
+            </a>
+        {% endif %}
+        <a href="{{ url_for('main.tasks', sprint_id=sprint.id) }}" class="border border-slate-300 px-4 py-2 rounded hover:bg-white">
+            Показать все задачи
+        </a>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-slate-200">
+            <tr>
+                <th class="p-3 text-left">Название</th>
+                <th class="p-3 text-left">Исполнитель</th>
+                <th class="p-3 text-left">Статус</th>
+                <th class="p-3 text-left">SP</th>
+                <th class="p-3 text-left">Дедлайн</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for task in sprint.tasks %}
+                <tr class="border-t">
+                    <td class="p-3">
+                        <a href="{{ url_for('main.task_detail', task_id=task.id) }}" class="text-blue-600">
+                            {{ task.title }}
+                        </a>
+                    </td>
+                    <td class="p-3">
+                        {% if task.assignee %}
+                            {{ task.assignee.full_name }}
+                        {% else %}
+                            Не назначен
+                        {% endif %}
+                    </td>
+                    <td class="p-3">{{ task.status }}</td>
+                    <td class="p-3">{{ task.story_points }}</td>
+                    <td class="p-3">{{ task.deadline }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="p-3 text-slate-500">
+                        Задач пока нет
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

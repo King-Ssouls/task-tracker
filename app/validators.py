@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import datetime
 
 ALLOWED_STATUSES = ["new", "in_progress", "review", "done"]
-ALLOWED_ROLES = ["admin", "teamlead", "developer"]
+ALLOWED_ROLES = ["admin", "developer"]
 
 #преобразование строку формата yyyy-mm-dd в дату
 def parse_date(date_string):
@@ -40,8 +40,8 @@ def validate_story_points(points):
     except ValueError:
         raise ValueError("Story points должны быть числом")
 
-    if points < 1 or points > 5:
-        raise ValueError("Story points должны быть от 1 до 5")
+    if points < 1 or points > 100:
+        raise ValueError("Story points должны быть от 1 до 100")
 
     return points
 
@@ -50,14 +50,6 @@ def validate_story_points(points):
 def validate_sprint_dates(start_date, end_date):
     if start_date is None or end_date is None:
         raise ValueError("Укажите даты спринта")
-
-    today = date.today()
-
-    if start_date < today:
-        raise ValueError("Дата начала спринта не может быть раньше текущего дня")
-
-    if end_date < today:
-        raise ValueError("Дата окончания спринта не может быть раньше текущего дня")
 
     if start_date > end_date:
         raise ValueError("Дата окончания не может быть раньше даты начала")

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-slate-900 to-blue-900 text-white rounded-2xl shadow-xl p-8 md:p-12">
+    <div class="max-w-3xl">
+        <h1 class="text-3xl md:text-5xl font-bold mb-5">
+            Добро пожаловать, {{ current_user.full_name }}!
+        </h1>
+        <p class="text-lg text-slate-200 leading-relaxed mb-8">
+            Создавайте проекты, собирайте команду, планируйте спринты и следите за выполнением задач в одном месте
+        </p>
+        <div class="flex flex-wrap gap-4">
+            <a href="{{ url_for('main.tasks', only_my=1) }}" class="bg-blue-500 hover:bg-blue-400 text-white px-5 py-3 rounded-lg font-semibold">
+                Перейти в аккаунт
+            </a>
+            <a href="{{ url_for('main.projects') }}" class="bg-white/10 hover:bg-white/20 border border-white/30 text-white px-5 py-3 rounded-lg font-semibold">
+                Поискать проекты
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="usage-steps-root" aria-label="Как начать работу"></section>
+
+<section class="mt-6 bg-white rounded-2xl shadow p-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-5">
+        <div>
+            <h2 class="text-2xl font-bold">Статистика выполнения задач</h2>
+            <p class="text-slate-500">Учитываются задачи, назначенные лично вам.</p>
+        </div>
+        <p class="text-3xl font-bold text-blue-600">{{ completion_percent }}%</p>
+    </div>
+    <div class="h-3 bg-slate-200 rounded-full overflow-hidden mb-6">
+        <div class="h-full bg-blue-600 rounded-full" style="width: {{ completion_percent }}%"></div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-slate-50 rounded-xl p-4">
+            <p class="text-sm text-slate-500">Всего назначено</p>
+            <p class="text-2xl font-bold">{{ total_tasks }}</p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-4">
+            <p class="text-sm text-amber-700">В работе</p>
+            <p class="text-2xl font-bold">{{ in_progress_tasks }}</p>
+        </div>
+        <div class="bg-emerald-50 rounded-xl p-4">
+            <p class="text-sm text-emerald-700">Выполнено</p>
+            <p class="text-2xl font-bold">{{ completed_tasks }}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

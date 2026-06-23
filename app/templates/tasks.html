@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование задачи{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow p-6 max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Редактирование задачи</h1>
+
+    <form method="post" class="space-y-4">
+        {% if can_manage %}
+            <div>
+                <label class="block mb-1">Спринт</label>
+                <select name="sprint_id" class="w-full border rounded px-3 py-2" required>
+                    {% for sprint in sprints %}
+                        <option value="{{ sprint.id }}" {% if task.sprint_id == sprint.id %}selected{% endif %}>
+                            {{ sprint.name }} — {{ sprint.project.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block mb-1">Исполнитель</label>
+                <select name="assignee_id" class="w-full border rounded px-3 py-2">
+                    <option value="">Не назначен</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if task.assignee_id == user.id %}selected{% endif %}>
+                            {{ user.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% else %}
+            <p class="text-sm text-slate-500">
+                Спринт и исполнителя может менять только тимлид проекта.
+            </p>
+        {% endif %}
+
+        <div>
+            <label class="block mb-1">Название</label>
+            <input type="text" name="title" value="{{ task.title }}" class="w-full border rounded px-3 py-2" required>
+        </div>
+
+        <div>
+            <label class="block mb-1">Описание</label>
+            <textarea name="description" class="w-full border rounded px-3 py-2">{{ task.description }}</textarea>
+        </div>
+
+        <div>
+            <label class="block mb-1">Статус</label>
+            <select name="status" class="w-full border rounded px-3 py-2">
+                {% for status in statuses %}
+                    <option value="{{ status }}" {% if task.status == status %}selected{% endif %}>
+                        {{ status }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block mb-1">Story points</label>
+            <input type="number" name="story_points" value="{{ task.story_points }}" min="1" max="100" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+            <label class="block mb-1">Дедлайн</label>
+            <input type="date" name="deadline" value="{{ task.deadline if task.deadline else '' }}" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <button class="bg-blue-600 text-white px-4 py-2 rounded">
+            Сохранить
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Проект{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <h1 class="text-2xl font-bold">{{ project.name }}</h1>
+    <p class="text-slate-600 mt-2">{{ project.description }}</p>
+    <p class="text-sm text-slate-500 mt-2">
+        Тимлид: {{ project.owner.full_name }}
+    </p>
+
+    <div class="mt-4 flex gap-3 items-center">
+        {% if is_teamlead %}
+            <a href="{{ url_for('main.sprint_create', project_id=project.id) }}" class="bg-blue-600 text-white px-4 py-2 rounded">
+                Создать спринт
+            </a>
+            <a href="{{ url_for('main.task_create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded">
+                Создать задачу
+            </a>
+        {% elif current_user.role == "admin" %}
+            <span class="text-blue-700">Просмотр проекта как администратор</span>
+        {% elif is_member %}
+            <span class="text-emerald-700">Вы участник проекта</span>
+        {% elif current_application and current_application.status == "pending" %}
+            <span class="text-amber-700">Ваша заявка ожидает решения тимлида</span>
+        {% else %}
+            <form method="post" action="{{ url_for('main.project_apply', project_id=project.id) }}">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded">Подать заявку</button>
+            </form>
+            {% if current_application and current_application.status == "rejected" %}
+                <span class="text-slate-500">Прошлая заявка была отклонена</span>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% if can_view_project_data %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <section class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Команда</h2>
+        <ul class="space-y-2">
+            {% for member in members %}
+                <li class="flex justify-between border-b pb-2">
+                    <span>{{ member.full_name }}</span>
+                    <span class="text-sm text-slate-500">
+                        {{ "тимлид" if member.id == project.owner_id else "участник" }}
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    {% if is_teamlead %}
+        <section class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Заявки на вступление</h2>
+            <div class="space-y-3">
+                {% for join_request in pending_requests %}
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div>
+                            <p class="font-semibold">{{ join_request.user.full_name }}</p>
+                            <p class="text-sm text-slate-500">{{ join_request.user.email }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <form method="post" action="{{ url_for('main.project_request_review', project_id=project.id, request_id=join_request.id, decision='approve') }}">
+                                <button class="bg-emerald-600 text-white px-3 py-1 rounded">Одобрить</button>
+                            </form>
+                            <form method="post" action="{{ url_for('main.project_request_review', project_id=project.id, request_id=join_request.id, decision='reject') }}">
+                                <button class="bg-slate-200 px-3 py-1 rounded">Отклонить</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-slate-500">Новых заявок нет</p>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">Спринты проекта</h2>
+    <a href="{{ url_for('main.sprints', project_id=project.id) }}" class="border border-slate-300 px-4 py-2 rounded hover:bg-white">
+        Показать все спринты
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-slate-200">
+            <tr>
+                <th class="p-3 text-left">Название</th>
+                <th class="p-3 text-left">Начало</th>
+                <th class="p-3 text-left">Конец</th>
+                <th class="p-3 text-left">Действие</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for sprint in project.sprints %}
+                <tr class="border-t">
+                    <td class="p-3">{{ sprint.name }}</td>
+                    <td class="p-3">{{ sprint.start_date }}</td>
+                    <td class="p-3">{{ sprint.end_date }}</td>
+                    <td class="p-3">
+                        <a href="{{ url_for('main.sprint_detail', sprint_id=sprint.id) }}" class="text-blue-600">
+                            Открыть
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="p-3 text-slate-500">
+                        Спринтов пока нет
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<section class="mt-6">
+    <div class="bg-white rounded-xl shadow p-5 mb-4">
+        <div class="flex justify-between items-end gap-4 mb-3">
+            <div>
+                <h2 class="text-xl font-bold">Задачи проекта</h2>
+                <p class="text-sm text-slate-500">
+                    Выполнено {{ completed_tasks }} из {{ project_tasks|length }} задач
+                </p>
+            </div>
+            <p class="text-2xl font-bold text-blue-600">{{ completion_percent }}%</p>
+        </div>
+        <div class="h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-600 rounded-full" style="width: {{ completion_percent }}%"></div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-slate-200">
+                <tr>
+                    <th class="p-3 text-left">Задача</th>
+                    <th class="p-3 text-left">Спринт</th>
+                    <th class="p-3 text-left">Исполнитель</th>
+                    <th class="p-3 text-left">Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in project_tasks %}
+                    <tr class="border-t">
+                        <td class="p-3">
+                            <a href="{{ url_for('main.task_detail', task_id=task.id) }}" class="text-blue-600">
+                                {{ task.title }}
+                            </a>
+                        </td>
+                        <td class="p-3">{{ task.sprint.name }}</td>
+                        <td class="p-3">{{ task.assignee.full_name if task.assignee else "Не назначен" }}</td>
+                        <td class="p-3">{{ task.status }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="p-3 text-slate-500">В проекте пока нет задач</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

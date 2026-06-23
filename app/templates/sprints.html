@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Спринты{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold">
+            {% if selected_project %}Спринты проекта «{{ selected_project.name }}»{% else %}Все спринты{% endif %}
+        </h1>
+        {% if selected_project %}
+            <a href="{{ url_for('main.sprints') }}" class="text-sm text-blue-600">Показать спринты всех проектов</a>
+        {% endif %}
+    </div>
+
+    {% if can_create_sprints %}
+        <a href="{{ url_for('main.sprint_create', project_id=selected_project.id) if selected_project else url_for('main.sprint_create') }}" class="bg-blue-600 text-white px-4 py-2 rounded">
+            Создать спринт
+        </a>
+    {% endif %}
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-slate-200">
+            <tr>
+                <th class="p-3 text-left">Название</th>
+                <th class="p-3 text-left">Проект</th>
+                <th class="p-3 text-left">Период</th>
+                <th class="p-3 text-left">Прогресс</th>
+                <th class="p-3 text-left">Действие</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for sprint in sprints %}
+                {% set stats = calculate_sprint_stats(sprint) %}
+                <tr class="border-t">
+                    <td class="p-3">{{ sprint.name }}</td>
+                    <td class="p-3">{{ sprint.project.name }}</td>
+                    <td class="p-3">{{ sprint.start_date }} — {{ sprint.end_date }}</td>
+                    <td class="p-3">{{ stats.actual_progress }}%</td>
+                    <td class="p-3">
+                        <a href="{{ url_for('main.sprint_detail', sprint_id=sprint.id) }}" class="text-blue-600">
+                            Открыть
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="p-3 text-slate-500">Спринтов пока нет</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

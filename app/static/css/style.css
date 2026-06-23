@@ -8,3 +8,61 @@ button,
 a {
     transition: 0.2s;
 }
+.usage-steps-root {
+    margin-top: 1.5rem;
+}
+.usage-steps-title {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+}
+.usage-steps-panel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 2rem;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 1rem;
+    background: #e2e8f0;
+}
+.usage-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.25rem;
+    text-align: center;
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(18px) scale(0.98);
+    transition:
+        opacity 1400ms ease var(--step-delay),
+        filter 1400ms ease var(--step-delay),
+        transform 1600ms cubic-bezier(0.16, 1, 0.3, 1) var(--step-delay);
+}
+.usage-steps-panel.is-visible .usage-step {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+}
+.usage-step-icon {
+    display: grid;
+    width: 4rem;
+    height: 4rem;
+    place-items: center;
+    border-radius: 9999px;
+    color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgb(15 23 42 / 10%);
+}
+.usage-step-icon img {
+    width: 2.25rem;
+    height: 2.25rem;
+    object-fit: contain;
+}
+.usage-step h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Создание спринта{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow p-6 max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Создание спринта</h1>
+
+    <form method="post" class="space-y-4">
+        <div>
+            <label class="block mb-1">Проект</label>
+            {% if selected_project %}
+                <input type="hidden" name="project_id" value="{{ selected_project.id }}">
+                <div class="w-full bg-slate-100 border rounded px-3 py-2 font-semibold">
+                    {{ selected_project.name }}
+                </div>
+            {% else %}
+                <select name="project_id" class="w-full border rounded px-3 py-2" required>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block mb-1">Название спринта</label>
+            <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
+        </div>
+
+        <div>
+            <label class="block mb-1">Дата начала</label>
+            <input type="date" name="start_date" class="w-full border rounded px-3 py-2" required>
+        </div>
+
+        <div>
+            <label class="block mb-1">Дата окончания</label>
+            <input type="date" name="end_date" class="w-full border rounded px-3 py-2" required>
+        </div>
+
+        <div>
+            <label class="block mb-1">Плановые story points</label>
+            <input type="number" name="planned_points" value="0" min="0" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <button class="bg-blue-600 text-white px-4 py-2 rounded">
+            Создать
+        </button>
+    </form>
+</div>
+{% endblock %}

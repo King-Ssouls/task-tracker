@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Проекты{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Проекты</h1>
+
+    <a href="{{ url_for('main.project_create') }}" class="bg-blue-600 text-white px-4 py-2 rounded">
+        Создать проект
+    </a>
+</div>
+
+<form method="get" class="bg-white rounded-xl shadow p-4 mb-6 flex gap-3">
+    <input
+        type="text"
+        name="search"
+        value="{{ selected_search }}"
+        placeholder="Найти проект по названию или описанию"
+        class="flex-1 border rounded px-3 py-2"
+    >
+    <button class="bg-slate-800 text-white px-4 py-2 rounded">Найти</button>
+    {% if selected_search %}
+        <a href="{{ url_for('main.projects') }}" class="border px-4 py-2 rounded">Сбросить</a>
+    {% endif %}
+</form>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    {% for project in projects %}
+        <article class="bg-white rounded-xl shadow p-5 flex flex-col border border-slate-100 hover:shadow-lg">
+            <div class="mb-4">
+                <h2 class="text-lg font-bold mb-2">{{ project.name }}</h2>
+                <p class="text-slate-600 text-sm leading-relaxed min-h-16">
+                    {{ project.description or "Описание проекта пока не добавлено." }}
+                </p>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-5">
+                Тимлид: {{ project.owner.full_name }}
+            </p>
+
+            <div class="mt-auto space-y-2">
+                <a href="{{ url_for('main.project_detail', project_id=project.id) }}" class="block text-center border border-slate-300 px-3 py-2 rounded-lg hover:bg-slate-50">
+                    Подробнее
+                </a>
+
+                {% if project.owner_id == current_user.id %}
+                    <span class="block text-center bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg">Вы тимлид</span>
+                {% elif project.id in member_project_ids %}
+                    <span class="block text-center bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg">Вы участник</span>
+                {% elif requests_by_project.get(project.id) and requests_by_project[project.id].status == "pending" %}
+                    <span class="block text-center bg-amber-50 text-amber-700 px-3 py-2 rounded-lg">Заявка отправлена</span>
+                {% else %}
+                    <form method="post" action="{{ url_for('main.project_apply', project_id=project.id) }}">
+                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">
+                            Подать заявку
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </article>
+    {% else %}
+        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 bg-white rounded-xl shadow p-8 text-center text-slate-500">
+            Проекты не найдены
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

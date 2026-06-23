@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Отчёты{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Отчёты и аналитика</h1>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-slate-200">
+            <tr>
+                <th class="p-3 text-left">Спринт</th>
+                <th class="p-3 text-left">Проект</th>
+                <th class="p-3 text-left">Прогресс</th>
+                <th class="p-3 text-left">План</th>
+                <th class="p-3 text-left">Отклонение</th>
+                <th class="p-3 text-left">Velocity</th>
+                <th class="p-3 text-left">В срок</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in report_items %}
+                <tr class="border-t">
+                    <td class="p-3">{{ item.sprint.name }}</td>
+                    <td class="p-3">{{ item.sprint.project.name }}</td>
+                    <td class="p-3">{{ item.stats.actual_progress }}%</td>
+                    <td class="p-3">{{ item.stats.planned_progress }}%</td>
+                    <td class="p-3">{{ item.stats.deviation }}%</td>
+                    <td class="p-3">{{ item.stats.velocity }}</td>
+                    <td class="p-3">{{ item.stats.on_time_percent }}%</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="p-3 text-slate-500">
+                        Нет данных для отчёта
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
